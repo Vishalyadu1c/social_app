@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/app_view.dart';
+import 'package:social_app/bloc/authentication_bloc/authentication_bloc.dart';
+import 'package:social_app/core/theme/app_theme.dart';
 import 'package:user_repository/user_repository.dart';
 
 class MyApp extends StatelessWidget {
@@ -8,8 +11,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(create: (create)=> Container()
-    child: ,
-    );
+    return RepositoryProvider<AuthenticationBloc>(
+      create: (context)=> AuthenticationBloc(userRepository: userRepository),
+      child: const AppView(),
+      );
   }
 }

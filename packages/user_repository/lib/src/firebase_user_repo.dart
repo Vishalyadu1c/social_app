@@ -18,6 +18,7 @@ class FirebaserUserRepository extends UserRepository {
     }): _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
 
+  // get MyUser
   @override
   Stream<MyUser> get user {
     return _firebaseAuth.authStateChanges().flatMap((firebaseAuth)async*{
@@ -28,7 +29,9 @@ class FirebaserUserRepository extends UserRepository {
       }
     });
   }
+    
 
+  // save MyUser in firebase store
   @override
   Future<void> setUserData(MyUser user) async{
     try {
@@ -39,16 +42,40 @@ class FirebaserUserRepository extends UserRepository {
     }
   }
 
+    @override
+  Future<void> update(MyUser user) async{
+   try {
+     await userCollection.doc(user.userId).update({
+      'name':user.name,
+      'profileImg':user.profileImg,
+      'about':user.about,
+      'lastActive':user.lastActive,
+      'isActive':user.isActive
+     });
+   } catch (e) {
+     print(e.toString());
+   }
+  }
+
+
+  // signIn user With Email And Password
   @override
   Future<void> signIn(String email, String password) async{
    try {
      await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-   } catch (e) {
-     print(e.toString());
+   } on FirebaseAuthException catch (e) {
+     if(e.code == 'weak-password'){
+        // the password provider is too weak
+        print("the password provider is too weak");
+     }else if(e.code == 'email-already-in-use'){
+        // that account already exists for that email
+        print('that account already exists for that email');
+     }
      rethrow;
    }
   }
 
+  // signUp user With Email And Password
   @override
   Future<MyUser> signUp(MyUser myUser, String password) async{
    try {
@@ -67,4 +94,10 @@ class FirebaserUserRepository extends UserRepository {
   Future<void> logout() async{
     await _firebaseAuth.signOut();
   }
+  
+  @override
+  Future<void> deleteAccount() async{
+   await _firebaseAuth.currentUser!.delete();
+  }
+  
 }
